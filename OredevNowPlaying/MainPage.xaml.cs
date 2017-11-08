@@ -21,6 +21,7 @@ namespace OredevNowPlaying
     /// </summary>
     public sealed partial class MainPage : Page
     {
+        private const float _blurDimension = 400;
         private Compositor _compositor;
         private LoadedImageSurface _imageSurface;
         private SpriteVisual _backgroundVisual;
@@ -34,6 +35,7 @@ namespace OredevNowPlaying
         private SurfaceFactory _surfaceFactory;
         private TextSurface _textSurface;
         private SpriteVisual _textVisual;
+        private SpriteVisual _blurVisual;
 
         public MainPage()
         {
@@ -62,7 +64,7 @@ namespace OredevNowPlaying
             // ****************************************************************************************
             // Compositor
 
-            //_compositor = Window.Current.Compositor;
+            _compositor = Window.Current.Compositor;
 
             // ****************************************************************************************
             // Load Image
@@ -71,6 +73,15 @@ namespace OredevNowPlaying
             //var backgroundBrush = _compositor.CreateSurfaceBrush(_imageSurface);
             //backgroundBrush.Stretch = CompositionStretch.UniformToFill;
 
+            //_backgroundVisual = _compositor.CreateSpriteVisual();
+            //_backgroundVisual.Brush = backgroundBrush;
+            //_backgroundVisual.Size = RootElement.RenderSize.ToVector2();
+
+            //_containerVisual = _compositor.CreateContainerVisual();
+            //_containerVisual.Children.InsertAtBottom(_backgroundVisual);
+            //ElementCompositionPreview.SetElementChildVisual(RootElement, _containerVisual);
+
+            // comment out _container visual above
             // ****************************************************************************************
             // Apply Saturation Effect (Win2D)
 
@@ -84,9 +95,6 @@ namespace OredevNowPlaying
             //var saturationBrush = saturationEffectFactory.CreateBrush();
             //saturationBrush.SetSourceParameter("background", backgroundBrush);
 
-            // ****************************************************************************************
-            // Add background to visual tree
-
             //_backgroundVisual = _compositor.CreateSpriteVisual();
             //_backgroundVisual.Brush = saturationBrush;
             //_backgroundVisual.Size = RootElement.RenderSize.ToVector2();
@@ -96,12 +104,7 @@ namespace OredevNowPlaying
             //ElementCompositionPreview.SetElementChildVisual(RootElement, _containerVisual);
 
             // ****************************************************************************************
-            // Add Lighting
-
-            //_ambientLight = _compositor.CreateAmbientLight();
-            //_ambientLight.Intensity = 1.5f;
-            //_ambientLight.Color = Colors.Purple;
-            //_ambientLight.Targets.Add(_backgroundVisual);
+            // Add Yellow Point Lighting
 
             //_pointLight1 = _compositor.CreatePointLight();
             //_pointLight1.Color = Colors.Yellow;
@@ -109,12 +112,23 @@ namespace OredevNowPlaying
             //_pointLight1.Targets.Add(_backgroundVisual);
             //_pointLight1.Offset = new Vector3((float)RootElement.ActualWidth, (float)RootElement.ActualHeight * 0.25f, 300);
 
+            // ****************************************************************************************
+            // Add Green Point Lighting
+
             //_pointLight2 = _compositor.CreatePointLight();
             //_pointLight2.Color = Colors.Green;
             //_pointLight2.Intensity = 2f;
             //_pointLight2.CoordinateSpace = _containerVisual;
             //_pointLight2.Targets.Add(_backgroundVisual);
             //_pointLight2.Offset = new Vector3(0, (float)RootElement.ActualHeight * 0.75f, 300);
+
+            // ****************************************************************************************
+            // Add Ambient Lighting
+
+            //_ambientLight = _compositor.CreateAmbientLight();
+            //_ambientLight.Intensity = 1.5f;
+            //_ambientLight.Color = Colors.Purple;
+            //_ambientLight.Targets.Add(_backgroundVisual);
 
             // ****************************************************************************************
             // Animate Lights - Create expression template
@@ -126,6 +140,7 @@ namespace OredevNowPlaying
 
             // ****************************************************************************************
             // Animate Lights - create implicit animations
+
             //_implicitOffsetAnimation = _compositor.CreateImplicitAnimationCollection();
             //_implicitOffsetAnimation[nameof(Visual.Offset)] = offsetAnimation;
 
@@ -139,14 +154,10 @@ namespace OredevNowPlaying
             //_lightTimer.Interval = TimeSpan.FromSeconds(10);
             //_lightTimer.Tick += LightTimerOnTick;
             //_lightTimer.Start();
-
-            // ****************************************************************************************
-            // AnimateLights - initial move
-
             //MoveLights();
 
             // ****************************************************************************************
-            // Add Text (RobMikh.SurfaceFactory) Ø
+            // Add Text (RobMikh.SurfaceFactory)
 
             //_surfaceFactory = SurfaceFactory.GetSharedSurfaceFactoryForCompositor(_compositor);
             //_textSurface = _surfaceFactory.CreateTextSurface("Hello Øredev!");
@@ -161,6 +172,28 @@ namespace OredevNowPlaying
             //_textVisual.StartAnimation(nameof(Visual.Offset), CreateTextAnimation());
 
             //_containerVisual.Children.InsertAtTop(_textVisual);
+
+            // ****************************************************************************************
+            // Add Blur Surface
+
+            //_blurVisual = _compositor.CreateSpriteVisual();
+            //var blurEffect = new GaussianBlurEffect()
+            //{
+            //    Name = "Blur",
+            //    BlurAmount = 12.0f, 
+            //    BorderMode = EffectBorderMode.Hard,
+            //    Optimization = EffectOptimization.Balanced,
+            //    Source = new CompositionEffectSourceParameter("source")
+            //};
+
+            //var effectFactory = _compositor.CreateEffectFactory(blurEffect);
+            //var effectBrush = effectFactory.CreateBrush();
+            //effectBrush.SetSourceParameter("source", _compositor.CreateBackdropBrush());
+            //_blurVisual.Brush = effectBrush;
+            //_blurVisual.Size = new Vector2(_blurDimension, _blurDimension);
+            //_blurVisual.Offset = new Vector3((float)RootElement.ActualWidth / 2.0f - (_blurDimension/2), (float)RootElement.ActualHeight / 2.0f - (_blurDimension / 2), 0);
+
+            //_containerVisual.Children.InsertAtTop(_blurVisual);
         }
 
         private void LightTimerOnTick(object sender, object o)
@@ -209,6 +242,11 @@ namespace OredevNowPlaying
             {
                 _textVisual.Offset = new Vector3((float)RootElement.ActualWidth / 2f, (float)RootElement.ActualHeight / 2f, 0);
                 _textVisual.StartAnimation(nameof(Visual.Offset), CreateTextAnimation());
+            }
+
+            if (_blurVisual != null)
+            {
+                _blurVisual.Offset = new Vector3((float)RootElement.ActualWidth / 2.0f - (_blurDimension / 2), (float)RootElement.ActualHeight / 2.0f - (_blurDimension / 2), 0);
             }
         }
 
